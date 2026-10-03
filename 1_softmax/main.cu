@@ -93,7 +93,7 @@ void softmax_v4_256(const float* in, float* out, int M, int N, cudaStream_t stre
     _softmax_v4<<<grid, block, 0, stream>>>(in, out, M, N);
 }
 
-void softamx_v5(const float* in, float* out, int M, int N, cudaStream_t stream) {
+void softmax_v5(const float* in, float* out, int M, int N, cudaStream_t stream) {
     dim3 block(256);
     dim3 grid(M);
     _softmax_v5<<<grid, block, 0, stream>>>(in, out, M, N);
@@ -105,8 +105,21 @@ void softmax_v6(const float* in, float* out, int M, int N, cudaStream_t stream) 
     _softmax_v6<<<grid, block, 0, stream>>>(in, out, M, N);
 }
 
-void softamx_v7(const float* in, float* out, int M, int N, cudaStream_t stream) {
+void softmax_v7(const float* in, float* out, int M, int N, cudaStream_t stream) {
     dim3 block(256);
+    dim3 grid(M);
+    _softmax_v7<<<grid, block, 0, stream>>>(in, out, M, N);
+}
+
+void softmax_v7_512(const float* in, float* out, int M, int N, cudaStream_t stream) {
+    dim3 block(512);
+    dim3 grid(M);
+    _softmax_v7<<<grid, block, 0, stream>>>(in, out, M, N);
+}
+
+
+void softmax_v7_1024(const float* in, float* out, int M, int N, cudaStream_t stream) {
+    dim3 block(1024);
     dim3 grid(M);
     _softmax_v7<<<grid, block, 0, stream>>>(in, out, M, N);
 }
@@ -120,9 +133,11 @@ static const Variant softmax_variants[] = {
     {"5. v3_block_per_row_warp_shfl_float4", softmax_v3},
     {"6. v4_block_per_row_warp_shfl_float4_multiwarp", softmax_v4},
     {"7. v4_256_block_per_row_warp_shfl_float4_multiwarp", softmax_v4_256},
-    {"8. v5_256_online_shfl_float4_multiwarp", softamx_v5},
-    {"9. v6_256_online_shfl_float4_multiwarp_strided", softmax_v6},
-    {"10. v7_256_online_shfl_float4_multiwarp_strided", softamx_v7}
+    {"9. v5_256_online_shfl_float4_multiwarp_strided", softmax_v5},
+    {"10. v6_256_online_shfl_float4_multiwarp_strided", softmax_v6},
+    {"11. v7_256_online_shfl_float4_multiwarp_strided", softmax_v7},
+    {"12. v7_512_online_shfl_float4_multiwarp_strided", softmax_v7_512},
+    {"13. v7_1024_online_shfl_float4_multiwarp_strided", softmax_v7_1024},
 
 
 };
@@ -160,7 +175,13 @@ int main(int argc, char** argv)
     cudaDeviceProp prop;
     CUDA_CHECK(cudaGetDeviceProperties(&prop, 0));
     printf("GPU: %s, M = %d\n\n", prop.name, M);
-    printf("%-50s %8s %12s %12s %14s\n", "variant", "N", "time(us)", "BW(GB/s)", "max_abs_err");
+
+    const char* csv_path = (argc > 2) ? argv[2] : "1_softmax/results/softmax_versions.csv";
+    FILE* csv = fopen(csv_path, "w");
+    if (!csv) { fprintf(stderr, "cannot open %s\n", csv_path); return 1; }
+    fprintf(csv, "gpu,M,variant,N,time_us,eff_bw_gbps,max_abs_err\n");
+
+    printf("%-50s %8s %12s %12s %14s\n", "variant", "N", "time(us)", "effBW(GB/s)", "max_abs_err");
 
     std::mt19937 rng(42);
     std::uniform_real_distribution<float> dist(-10.f, 10.f);
@@ -197,10 +218,12 @@ int main(int argc, char** argv)
             const double gbps = 2.0 * bytes / (ms * 1e-3) / 1e9;
 
             printf("%-50s %8d %12.2f %12.1f %14.3e\n", v.name, N, ms * 1e3, gbps, max_err);
+            fprintf(csv, "%s,%d,%s,%d,%.2f,%.1f,%.3e\n", prop.name, M, v.name, N, ms * 1e3, gbps, max_err);
         }
 
         CUDA_CHECK(cudaFree(d_in));
         CUDA_CHECK(cudaFree(d_out));
     }
+    fclose(csv);
     return 0;
 }
