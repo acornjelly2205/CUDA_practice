@@ -30,14 +30,14 @@
 - Same kernel as #1
 - Thread block: (64), grid: ((M + 63) / 64) = (1024), so the number of threads per block is a multiple of 32
 - Lower register usage per thread block increases occupancy
-![thread_block_size_profiling](profiling/2_.png)
+![thread_block_size_profiling](results/profiling/2_.png)
 
 ### 3. (v1_block_per_row)
 - One thread block processes one row
 - Since multiple threads process a single row, synchronization and atomicAdd are used
 - Thread block: (32), grid: (M)
 - Branch efficiency decreases, but SM busy increases
-![row_per_CTA_atomicAdd_profiling](profiling/3_.png)
+![row_per_CTA_atomicAdd_profiling](results/profiling/3_.png)
 
 ### 4. (v2_block_per_row_warp_shfl)
 - One thread block processes one row
@@ -45,7 +45,7 @@
 - Each thread block consists of a single warp, so no inter-warp synchronization is needed
 - Thread block: (32), grid: (M)
 - Fewer branch instructions raise branch efficiency; avg. divergent branches = 0
-![warp_shfl_profiling](profiling/4_.png)
+![warp_shfl_profiling](results/profiling/4_.png)
 
 ### 5. (v3_block_per_row_warp_shfl_float4)
 - One thread block processes one row
@@ -54,7 +54,7 @@
 - Vectorized loads using float4
 - Thread block: (32), grid: (M)
 - Average DRAM active cycles decrease
-![vectorized_load](profiling/5_.png)
+![vectorized_load](results/profiling/5_.png)
 
 ### 6. (v4_block_per_row_warp_shfl_float4_multiwarp)
 - One thread block processes one row
@@ -64,7 +64,7 @@
 - Indexing: the row is divided into contiguous chunks, one per thread, and each thread accesses its chunk sequentially
 - Thread block: (128), grid: (M)
 - Synchronization and atomic operations lower branch efficiency, but the larger block size increases occupancy and SM utilization
-![multiwarp_shfl_profiling](profiling/6_.png)
+![multiwarp_shfl_profiling](results/profiling/6_.png)
 
 ### 7. (v4_256_block_per_row_warp_shfl_float4_multiwarp)
 - One thread block processes one row
@@ -74,7 +74,7 @@
 - Indexing: the row is divided into contiguous chunks, one per thread, and each thread accesses its chunk sequentially
 - Thread block: (256), grid: (M)
 - Synchronization and atomic operations lower branch efficiency, but the larger block size increases occupancy and SM utilization
-![multiwarp_shfl_profiling](profiling/7_.png)
+![multiwarp_shfl_profiling](results/profiling/7_.png)
 
 ### 8. (v5_256_online_shfl_float4_multiwarp_strided)
 - Online softmax
