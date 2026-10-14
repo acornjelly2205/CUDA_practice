@@ -43,8 +43,7 @@
 - Threads within the same warp perform the reduction via warp shuffle
 - Each thread block consists of a single warp, so no inter-warp synchronization is needed
 - Thread block: (32), grid: (M)
-- Fewer branch instructions raise branch efficiency; avg. divergent branches = 0
-- atomic 
+- Fewer branch instructions raise branch efficiency; avg. divergent branches = 0 
 ![warp_shfl_profiling](results/profiling/4_.png)
 
 ### 5. (v3_block_per_row_warp_shfl_float4)
