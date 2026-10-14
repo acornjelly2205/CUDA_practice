@@ -19,6 +19,7 @@
 ## 3. Optimizations and Results (with NCU)
 
 - Each NCU screenshot compares the kernel with the previous-numbered kernel.
+![Memory Access and Warp Scheduling Metrics Across Softmax Variants](results/profiling/softmax_plot.png)
 
 ### 1. (v0_thread_per_row)
 - One thread processes one row
@@ -29,8 +30,6 @@
 - One thread processes one row
 - Same kernel as #1
 - Thread block: (64), grid: ((M + 63) / 64) = (1024), so the number of threads per block is a multiple of 32
-- Lower register usage per thread block increases occupancy
-![thread_block_size_profiling](results/profiling/2_.png)
 
 ### 3. (v1_block_per_row)
 - One thread block processes one row
@@ -53,8 +52,6 @@
 - Each thread block consists of a single warp, so no inter-warp synchronization is needed
 - Vectorized loads using float4
 - Thread block: (32), grid: (M)
-- Average DRAM active cycles decrease
-![vectorized_load](results/profiling/5_.png)
 
 ### 6. (v4_block_per_row_warp_shfl_float4_multiwarp)
 - One thread block processes one row
@@ -73,8 +70,6 @@
 - Vectorized loads using float4
 - Indexing: the row is divided into contiguous chunks, one per thread, and each thread accesses its chunk sequentially
 - Thread block: (256), grid: (M)
-- Synchronization and atomic operations lower branch efficiency, but the larger block size increases occupancy and SM utilization
-![multiwarp_shfl_profiling](results/profiling/7_.png)
 
 ### 8. (v5_256_online_shfl_float4_multiwarp_strided)
 - Online softmax
@@ -84,6 +79,9 @@
 - Vectorized loads using float4
 - Indexing: each thread accesses 4 consecutive elements at a time, then advances by a fixed stride and repeats (strided access)
 - Thread block: (256), grid: (M)
+- global memory coalescing -> lower sector -> lower L1 sector/request
+- online softmax -> lower DRAM load
+
 
 ### 9. (v6_256_online_shfl_float4_multiwarp_strided)
 - Online softmax
@@ -94,6 +92,7 @@
 - Indexing: each thread accesses 4 consecutive elements at a time, then advances by a fixed stride and repeats (strided access)
 - float4 also used for stores
 - Thread block: (256), grid: (M)
+- float4 -> lower request -> higher L1 sector/request
 
 ### 10. (v7_256_online_shfl_float4_multiwarp_strided)
 - Online softmax
@@ -127,3 +126,5 @@
 - float4 also used for stores
 - Loop unrolling applied
 - Thread block: (1024), grid: (M)
+- high eligible warps / scheduler / cycle
+  
