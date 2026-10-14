@@ -29,7 +29,8 @@
 ### 2. (v0_thread_per_row_warp)
 - One thread processes one row
 - Same kernel as #1
-- Thread block: (64), grid: ((M + 63) / 64) = (1024), so the number of threads per block is a multiple of 32
+- Thread block: (64), grid: ((M + 63) / 64) = (1024)
+- reduced the number of threads per block and increased the number of blocks, allowing work to be distributed across more SMs
 
 ### 3. (v1_block_per_row)
 - One thread block processes one row
