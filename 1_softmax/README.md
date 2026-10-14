@@ -44,6 +44,7 @@
 - Each thread block consists of a single warp, so no inter-warp synchronization is needed
 - Thread block: (32), grid: (M)
 - Fewer branch instructions raise branch efficiency; avg. divergent branches = 0
+- atomic 
 ![warp_shfl_profiling](results/profiling/4_.png)
 
 ### 5. (v3_block_per_row_warp_shfl_float4)
@@ -80,7 +81,6 @@
 - Indexing: each thread accesses 4 consecutive elements at a time, then advances by a fixed stride and repeats (strided access)
 - Thread block: (256), grid: (M)
 - global memory coalescing -> lower sector -> lower L1 sector/request
-- online softmax -> lower DRAM load
 
 
 ### 9. (v6_256_online_shfl_float4_multiwarp_strided)
