@@ -8,7 +8,7 @@ Each kernel starts from a naive implementation and is improved one change at a t
 | # | Operation | Status |
 |---|---|---|
 | 1 | [Softmax](1_softmax/) | Done | 
-| 2 | [Histogram(2_histogram/)] |    |
+| 2 | [Histogram](2_histogram/) |    |
 
 
 ## Methodology
