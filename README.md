@@ -8,6 +8,7 @@ Each kernel starts from a naive implementation and is improved one change at a t
 | # | Operation | Status |
 |---|---|---|
 | 1 | [Softmax](1_softmax/) | Done | 
+| 2 | [Histogram(2_histogram/)] |    |
 
 
 ## Methodology
@@ -22,6 +23,7 @@ Each kernel starts from a naive implementation and is improved one change at a t
 ```bash
 make                  # build all kernels
 make 1_softmax        # build a single kernel by folder name
+make 2_histogram
 make clean
 ```
 
